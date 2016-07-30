@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>XDomainDemoPage1.htm</title>
+    <meta charset='utf-8'>
+
+    <style>
+        body {
+            padding: 0px;
+            margin: 0px
+        }
+        
+        #div1 {
+            border: 0px;
+            background-color: #cce;
+            height: 215px
+        }
+        
+        #welcomeMsg {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-family: sans-serif;
+            border-bottom: 2px solid black;
+            background: teal;
+            color: white;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: center
+        }
+        
+        #controls {
+            margin-left: 8px;
+            padding-top: 4px;
+            padding-bottom: 4px
+        }
+        
+        #waiting {
+            margin-left: 8px;
+            padding-bottom: 5px
+        }
+        
+        #Droplist,
+        #Checkbox {
+            margin-right: 30px
+        }
+        
+        #Checkbox {
+            vertical-align: -2px
+        }
+        
+        #Inputbox {
+            width: 120px
+        }
+        
+        #msgDisplay {
+            padding: 8px;
+            background-color: #ffb;
+            margin-left: 8px;
+            margin-right: 8px;
+            font-size: 13px
+        }
+    </style>
+
+    <script type='text/javascript'>
+        //  alert('Welcome to www.jotproc.com/xdomaindemos/xdomaindemopage1.htm');              // Debug only
+
+        function OnMessage(evt) {
+            //      alert('XDomainDemoPage1.htm');                                                  // Debug only
+
+            //      alert('XDomainDemoPage1.htm: evt.origin = ' + evt.origin);                      // Debug only
+
+            if (evt.origin !== 'http://www.javascriptmonastery.com' // Check the location of the caller
+                && evt.origin !== 'http://javascriptmonastery.com' && evt.origin !== 'http://127.0.0.1' && evt.origin !== 'http://localhost' && evt.origin !== 'http://jsm'
+            ) return;
+
+            displayMessage(evt);
+
+            if (evt.data == 'getRemoteValues') {
+                var select = document.getElementById('Droplist'),
+                    checkBox = document.getElementById('Checkbox'),
+                    Inputbox = document.getElementById('Inputbox'),
+                    s = Inputbox.value.substring(0, 20).replace(/</g, '&lt;'); // Sanitize the input
+                //          alert('Inputbox.value.substring(0,20) = ' + s);                             // Debug only
+
+                var message = evt.origin + ',' + checkBox.checked + ',' + select.selectedIndex + ',' + select.options[select.selectedIndex].text + ',' + select.value + ',' + s;
+
+                evt.source.postMessage(message, evt.origin); // send back the response message
+            }
+        }
+
+        function displayMessage(evt) {
+            var s = 'Message received from: ',
+                br = '<br>';
+
+            document.getElementById('waiting').innerHTML = 'I just received this message:';
+
+            if ('domain' in evt) s += 'domain: ' + evt.domain; // Opera pre-v10
+            if ('uri' in evt) s += 'url: ' + evt.uri; // Opera pre-v10
+            if ('origin' in evt) s += evt.origin; // FF,SA,CH, IE8+,OP10+
+
+            s += br + 'Message Contents: ' + evt.data;
+            if ('lastEventId' in evt) s += br + 'lastEventId: ' + evt.lastEventId; // FF,SA,CH
+
+            document.getElementById('msgDisplay').innerHTML = s;
+        }
+
+        (window.addEventListener && window.addEventListener('message', OnMessage, false) // FF,SA,CH,OP,IE9+
+            || window.attachEvent && window.attachEvent('onmessage', OnMessage)); // IE8
+    </script>
+</head>
+
+<body>
+    <div id='div1'>
+        <div id='welcomeMsg'>Welcome to www.jotproc.com/xdomaindemos/xdomaindemopage1.htm</div>
+
+        <div id='controls'>
+            Droplist &nbsp; <select id='Droplist'>
+            <option value='canine'>Dogs</option>
+            <option value='feline'>Cats</option>
+            <option value='equine'>Horses</option>
+        </select> Checkbox &nbsp; <input type='checkbox' id='Checkbox'> Inputbox &nbsp; <input type='text' id='Inputbox'>
+        </div>
+        <hr>
+        <p id='waiting'>Waiting for a message...</p>
+        <div id='msgDisplay'></div>
+    </div>
+</body>
+
+</html>
